@@ -19,8 +19,8 @@ function App() {
 
   return (
     <div style={{ padding: '20px', textAlign: 'center' }}>
-      <h1>🎤 リアルタイム音声転写アプリ</h1>
-      <p>ブラウザでマイク音声をリアルタイムで日本語に転写します</p>
+      <h1>🎤 リアルタイム音声文字起こしアプリ</h1>
+      <p>ブラウザでマイク音声をリアルタイムで日本語に文字起こしします</p>
       
       <div style={{ margin: '20px 0' }}>
         <h3>ブラウザ対応状況</h3>
@@ -44,7 +44,7 @@ function App() {
           marginTop: '20px',
         }}
       >
-        音声転写を開始
+        音声文字起こしを開始
       </button>
       
       <div style={{ marginTop: '30px', fontSize: '14px', color: '#666' }}>

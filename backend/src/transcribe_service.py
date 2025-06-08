@@ -37,11 +37,11 @@ class TranscribeService:
 
     async def start_session(self):
         """転写セッション開始 - 実際の処理は transcribe_audio_chunk で行う"""
-        print("📢 転写サービス準備完了")
+        print("📢 文字起こしサービス準備完了")
         return True
 
     async def transcribe_audio_chunk(self, audio_data: bytes) -> Optional[str]:
-        """音声チャンクを転写 - 元のtranscribe.pyパターンを使用"""
+        """音声チャンクを文字起こし - 元のtranscribe.pyパターンを使用"""
         
         try:
             print(f"🎤 音声データ受信: {len(audio_data)} bytes")
@@ -80,7 +80,7 @@ class TranscribeService:
                     # サーバーコンテンツをチェック
                     if hasattr(response, 'server_content') and response.server_content:
                         if hasattr(response.server_content, 'turn_complete') and response.server_content.turn_complete:
-                            print("✅ 転写完了")
+                            print("✅ 文字起こし完了")
                             break
                     
                     # タイムアウト (15秒)
@@ -93,21 +93,21 @@ class TranscribeService:
                 # 最終結果を返す
                 if all_responses:
                     final_result = " ".join(all_responses)
-                    print(f"📄 最終転写結果: '{final_result}'")
+                    print(f"📄 最終文字起こし結果: '{final_result}'")
                     return final_result
                 else:
-                    print("❌ 転写結果が取得できませんでした")
+                    print("❌ 文字起こし結果が取得できませんでした")
                     return None
                     
         except Exception as e:
-            print(f"❌ 転写エラー: {e}")
+            print(f"❌ 文字起こしエラー: {e}")
             import traceback
             traceback.print_exc()
             return None
 
     async def end_session(self):
-        """転写セッション終了"""
-        print("🔚 転写サービス終了")
+        """文字起こしセッション終了"""
+        print("🔚 文字起こしサービス終了")
 
     async def cleanup(self):
         """リソースクリーンアップ"""

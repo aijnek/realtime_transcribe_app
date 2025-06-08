@@ -1,4 +1,4 @@
-# リアルタイム音声転写アプリ - アーキテクチャ設計書
+# リアルタイム音声文字起こしアプリ - アーキテクチャ設計書
 
 ## プロジェクト概要
 現在のモノリシック構成（バックエンドでマイク収集も実行）から、フロントエンド/バックエンド分離アーキテクチャへ移行する。
@@ -9,7 +9,7 @@
 ```
 Frontend (Browser) ←→ Backend (Python API) ←→ Google Gemini Live API
      ↑                        ↑
-  マイク収集              リアルタイム転写
+  マイク収集              リアルタイム文字起こし
   音声送信                 結果配信
   結果表示
 ```
@@ -17,9 +17,9 @@ Frontend (Browser) ←→ Backend (Python API) ←→ Google Gemini Live API
 ### データフロー
 1. **音声収集**: フロントエンド（ブラウザ）でマイク音声をキャプチャ
 2. **音声送信**: WebSocketでリアルタイムに音声データをバックエンドに送信
-3. **転写処理**: バックエンドでGemini Live APIを使用して転写
-4. **結果配信**: WebSocketで転写結果をフロントエンドに配信
-5. **表示更新**: フロントエンドでリアルタイム転写結果を表示
+3. **文字起こし処理**: バックエンドでGemini Live APIを使用して文字起こし
+4. **結果配信**: WebSocketで文字起こし結果をフロントエンドに配信
+5. **表示更新**: フロントエンドでリアルタイム文字起こし結果を表示
 
 ## 技術スタック
 
@@ -37,9 +37,9 @@ Frontend (Browser) ←→ Backend (Python API) ←→ Google Gemini Live API
 - **uvicorn**: ASGI サーバー
 
 ### 通信プロトコル
-- **WebSocket**: 音声データストリーミング + 転写結果配信
+- **WebSocket**: 音声データストリーミング + 文字起こし結果配信
 - **Binary Format**: 音声データ効率送信（Base64エンコード）
-- **JSON**: 制御メッセージと転写結果
+- **JSON**: 制御メッセージと文字起こし結果
 
 ## 実装計画
 
@@ -59,7 +59,7 @@ Frontend (Browser) ←→ Backend (Python API) ←→ Google Gemini Live API
    - 音声データ受信・転送処理
 
 4. **リアルタイム配信**
-   - 転写結果のWebSocket配信
+   - 文字起こし結果のWebSocket配信
    - エラーハンドリングと接続状態管理
 
 ### Phase 2: フロントエンド構築 🎯
@@ -77,11 +77,11 @@ Frontend (Browser) ←→ Backend (Python API) ←→ Google Gemini Live API
 3. **WebSocket通信**
    - WebSocket接続管理
    - 音声データ送信（Binary/Base64）
-   - 転写結果受信処理
+   - 文字起こし結果受信処理
 
 4. **UI実装**
    - 録音開始/停止ボタン
-   - リアルタイム転写結果表示
+   - リアルタイム文字起こし結果表示
    - 接続状態インジケーター
 
 ### Phase 3: 統合とテスト 🎯
@@ -90,7 +90,7 @@ Frontend (Browser) ←→ Backend (Python API) ←→ Google Gemini Live API
 1. **統合テスト**
    - フロントエンド ↔ バックエンド接続確認
    - 音声データ送受信テスト
-   - 転写精度・遅延測定
+   - 文字起こし精度・遅延測定
 
 2. **最適化**
    - 音声データ圧縮・効率化
@@ -127,11 +127,11 @@ ws://localhost:8000/ws/transcribe
 }
 ```
 
-**転写結果** (Server → Client):
+**文字起こし結果** (Server → Client):
 ```json
 {
   "type": "transcription_result",
-  "text": "転写されたテキスト",
+  "text": "文字起こしされたテキスト",
   "is_partial": false,
   "timestamp": 1234567890
 }
@@ -170,7 +170,7 @@ realtime_transcription_app/
 
 ## パフォーマンス要件
 
-- **音声遅延**: < 500ms（収集→転写結果表示）
+- **音声遅延**: < 500ms（収集→文字起こし結果表示）
 - **接続安定性**: 長時間接続維持
 - **音声品質**: 16kHz, mono, 16-bit（現在の設定維持）
 - **同時接続**: 初期は1接続、将来的に複数接続対応

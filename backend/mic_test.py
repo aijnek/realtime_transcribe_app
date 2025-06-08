@@ -86,21 +86,21 @@ async def test_with_microphone():
                 print("📤 音声データ送信中...")
                 await websocket.send(json.dumps(audio_message))
                 
-                # 転写結果待機
-                print("⏳ 転写結果待機...")
+                # 文字起こし結果待機
+                print("⏳ 文字起こし結果待機...")
                 try:
                     response = await asyncio.wait_for(websocket.recv(), timeout=20.0)
                     result = json.loads(response)
                     
                     if result["type"] == "transcription_result":
                         print("=" * 50)
-                        print(f"📝 転写結果: '{result['text']}'")
+                        print(f"📝 文字起こし結果: '{result['text']}'")
                         print("=" * 50)
                     else:
                         print(f"📥 応答: {response}")
                         
                 except asyncio.TimeoutError:
-                    print("⏰ タイムアウト: 転写結果が返されませんでした")
+                    print("⏰ タイムアウト: 文字起こし結果が返されませんでした")
                 
             except Exception as e:
                 print(f"❌ 録音エラー: {e}")

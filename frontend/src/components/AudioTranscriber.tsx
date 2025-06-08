@@ -103,7 +103,7 @@ export const AudioTranscriber: React.FC = () => {
         marginBottom: '30px',
         fontSize: '32px'
       }}>
-        🎤 リアルタイム音声転写
+        🎤 リアルタイム音声文字起こし
       </h1>
       
       {/* Status indicators */}
@@ -258,7 +258,7 @@ export const AudioTranscriber: React.FC = () => {
           fontSize: '20px',
           fontWeight: '600'
         }}>
-          転写結果
+          文字起こし結果
         </h3>
         {transcriptionResults.length === 0 ? (
           <div style={{ 
@@ -267,7 +267,7 @@ export const AudioTranscriber: React.FC = () => {
             color: '#888',
             fontSize: '16px'
           }}>
-            📝 録音開始ボタンを押して音声転写を開始してください
+            📝 録音開始ボタンを押して音声文字起こしを開始してください
           </div>
         ) : (
           <div>

@@ -1,10 +1,10 @@
-# リアルタイム音声転写アプリ
+# リアルタイム音声文字起こしアプリ
 
-Google Gemini Live APIを使用したリアルタイム音声転写アプリケーション。フロントエンド/バックエンド分離アーキテクチャで、ブラウザからの音声入力をリアルタイムで日本語に転写します。
+Google Gemini Live APIを使用したリアルタイム音声文字起こしアプリケーション。フロントエンド/バックエンド分離アーキテクチャで、ブラウザからの音声入力をリアルタイムで日本語に文字起こしします。
 
 ## 機能
 
-- **リアルタイム音声転写**: Google Gemini Live APIによる高精度な音声認識
+- **リアルタイム音声文字起こし**: Google Gemini Live APIによる高精度な音声認識
 - **フィラー除去**: 「えー」「あのー」などの不要な音を自動削除
 - **自然な日本語整形**: 重複や冗長な表現を自然な日本語に修正
 - **WebSocket通信**: フロントエンド/バックエンド間のリアルタイム通信
@@ -17,7 +17,7 @@ realtime_transcription_app/
 │   ├── src/
 │   │   ├── main.py            # FastAPIアプリケーション
 │   │   ├── transcribe_service.py # Gemini Live API連携
-│   │   └── transcribe.py      # オリジナル転写スクリプト
+│   │   └── transcribe.py      # オリジナル文字起こしスクリプト
 │   ├── mic_test.py            # マイクテスト用クライアント
 │   └── pyproject.toml         # 依存関係管理
 ├── frontend/                   # React + TypeScript Webアプリ
@@ -94,8 +94,8 @@ realtime_transcription_app/
    - http://localhost:5173 を開く
    - 「録音開始」ボタンをクリック
    - マイクアクセスを許可
-   - 話し始める（2秒間沈黙で転写実行）
-   - 転写結果がリアルタイムで表示される
+   - 話し始める（2秒間沈黙で文字起こし実行）
+   - 文字起こし結果がリアルタイムで表示される
 
 ### テスト（バックエンドのみ）
 
@@ -129,11 +129,11 @@ uv run python mic_test.py
 }
 ```
 
-**転写結果** (Server → Client):
+**文字起こし結果** (Server → Client):
 ```json
 {
   "type": "transcription_result",
-  "text": "転写されたテキスト",
+  "text": "文字起こしされたテキスト",
   "timestamp": 1234567890
 }
 ```
@@ -144,7 +144,7 @@ uv run python mic_test.py
 - ✅ バックエンドAPI (FastAPI + WebSocket)
 - ✅ Gemini Live API連携
 - ✅ 音声チャンク処理
-- ✅ 日本語転写・整形機能
+- ✅ 日本語文字起こし・整形機能
 - ✅ フロントエンド (React + TypeScript)
 - ✅ ブラウザマイク音声収集
 - ✅ 音声区切り検出
@@ -153,8 +153,8 @@ uv run python mic_test.py
 
 ### 主な特徴
 - **ブラウザベース**: インストール不要、Webブラウザで動作
-- **リアルタイム処理**: 発話終了を自動検出して即座に転写
-- **高精度転写**: Google Gemini Live APIによる日本語認識
+- **リアルタイム処理**: 発話終了を自動検出して即座に文字起こし
+- **高精度文字起こし**: Google Gemini Live APIによる日本語認識
 - **フィラー除去**: 「えー」「あのー」等の不要語句を自動削除
 - **モダンUI**: レスポンシブデザイン、視覚的フィードバック
 
