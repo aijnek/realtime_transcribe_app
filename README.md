@@ -20,7 +20,13 @@ realtime_transcription_app/
 │   │   └── transcribe.py      # オリジナル転写スクリプト
 │   ├── mic_test.py            # マイクテスト用クライアント
 │   └── pyproject.toml         # 依存関係管理
-├── frontend/                   # React + TypeScript (予定)
+├── frontend/                   # React + TypeScript Webアプリ
+│   ├── src/
+│   │   ├── components/        # Reactコンポーネント
+│   │   ├── hooks/             # カスタムフック
+│   │   └── App.tsx           # メインアプリ
+│   ├── package.json          # フロントエンド依存関係
+│   └── vite.config.ts        # Vite設定
 ├── ARCHITECTURE.md            # 詳細アーキテクチャ設計
 └── CLAUDE.md                  # 開発ガイダンス
 ```
@@ -30,7 +36,9 @@ realtime_transcription_app/
 ### 必要な環境
 
 - Python 3.13+
-- uv (パッケージマネージャー)
+- Node.js 18+
+- uv (Pythonパッケージマネージャー)
+- npm (Node.jsパッケージマネージャー)
 - Google API Key (Gemini API)
 
 ### バックエンド
@@ -54,7 +62,42 @@ realtime_transcription_app/
    
    サーバーは http://localhost:8000 で起動します。
 
-### テスト
+### フロントエンド
+
+1. **依存関係インストール**
+   ```bash
+   cd frontend
+   npm install
+   ```
+
+2. **開発サーバー起動**
+   ```bash
+   npm run dev
+   ```
+   
+   フロントエンドは http://localhost:5173 で起動します。
+
+## 使用方法
+
+1. **両方のサーバーを起動**
+   ```bash
+   # ターミナル1: バックエンド
+   cd backend
+   uv run python -m src.main
+   
+   # ターミナル2: フロントエンド  
+   cd frontend
+   npm run dev
+   ```
+
+2. **ブラウザでアクセス**
+   - http://localhost:5173 を開く
+   - 「録音開始」ボタンをクリック
+   - マイクアクセスを許可
+   - 話し始める（2秒間沈黙で転写実行）
+   - 転写結果がリアルタイムで表示される
+
+### テスト（バックエンドのみ）
 
 マイク入力でバックエンドAPIをテスト：
 
@@ -102,20 +145,27 @@ uv run python mic_test.py
 - ✅ Gemini Live API連携
 - ✅ 音声チャンク処理
 - ✅ 日本語転写・整形機能
-- ✅ マイク入力テスト
+- ✅ フロントエンド (React + TypeScript)
+- ✅ ブラウザマイク音声収集
+- ✅ 音声区切り検出
+- ✅ リアルタイムUI表示
+- ✅ エンドツーエンド統合
 
-### 開発予定
-- 🚧 フロントエンド (React + TypeScript)
-- 🚧 ブラウザマイク音声収集
-- 🚧 音声区切り検出
-- 🚧 リアルタイムUI表示
+### 主な特徴
+- **ブラウザベース**: インストール不要、Webブラウザで動作
+- **リアルタイム処理**: 発話終了を自動検出して即座に転写
+- **高精度転写**: Google Gemini Live APIによる日本語認識
+- **フィラー除去**: 「えー」「あのー」等の不要語句を自動削除
+- **モダンUI**: レスポンシブデザイン、視覚的フィードバック
 
 ## 技術スタック
 
 - **バックエンド**: FastAPI, WebSocket, Google GenAI, uvicorn
-- **フロントエンド**: React, TypeScript, Web Audio API, Vite (予定)
+- **フロントエンド**: React, TypeScript, Web Audio API, Vite
 - **通信**: WebSocket (Binary + JSON)
 - **音声処理**: Google Gemini Live API
+- **UI**: モダンCSS、レスポンシブデザイン
+- **開発環境**: uv (Python), npm (Node.js)
 
 ## ライセンス
 

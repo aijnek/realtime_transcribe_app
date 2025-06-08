@@ -17,18 +17,18 @@ This is a realtime transcription application with a backend Python service using
 
 ### Backend Development
 
-Run from the `backend/` directory to ensure proper environment variable loading:
+Start the FastAPI WebSocket server:
 
 ```bash
 cd backend
-python src/transcribe.py
+uv run python -m src.main
 ```
 
-Or as a module:
+Test with microphone input:
 
 ```bash
 cd backend
-python -m src.transcribe
+uv run python mic_test.py
 ```
 
 Install dependencies:
@@ -47,7 +47,8 @@ uv sync
 ## Audio Transcription Architecture
 
 The transcription system uses:
-- Google Gemini 2.0 Flash Live model for real-time transcription
-- PyAudio for microphone input (16kHz, mono, 16-bit)
-- Real-time streaming with automatic speech detection
-- Japanese language optimized with filler word removal and natural language correction
+- **FastAPI + WebSocket**: Real-time audio data streaming
+- **Google Gemini 2.0 Flash Live**: AI-powered transcription
+- **Frontend audio collection**: Browser-based microphone capture (planned)
+- **16kHz mono 16-bit PCM**: Audio format specification
+- **Japanese language optimized**: Filler word removal and natural language correction
