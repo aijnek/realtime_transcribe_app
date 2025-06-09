@@ -45,6 +45,7 @@ realtime_transcription_app/
 
 1. **依存関係インストール**
    ```bash
+   brew install portaudio (pyaudioのインストールに必要)
    cd backend
    uv sync
    ```
