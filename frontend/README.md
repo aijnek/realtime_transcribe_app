@@ -1,54 +1,102 @@
-# React + TypeScript + Vite
+# リアルタイム音声文字起こしアプリ - フロントエンド
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+このプロジェクトは、Google Gemini Live APIを使用したリアルタイム音声文字起こしアプリケーションのフロントエンド部分です。React + TypeScript + Viteを使用して構築されています。
 
-Currently, two official plugins are available:
+## 主な機能
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- ブラウザマイクからのリアルタイム音声収集
+- WebSocketを使用したバックエンドとのリアルタイム通信
+- 文字起こし結果のリアルタイム表示
+- 音声レベルビジュアライザー
+- レスポンシブデザイン
 
-## Expanding the ESLint configuration
+## 技術スタック
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- **フレームワーク**: React 18
+- **言語**: TypeScript
+- **ビルドツール**: Vite
+- **音声処理**: Web Audio API
+- **通信**: WebSocket API
+- **スタイリング**: モダンCSS
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+## 開発環境のセットアップ
+
+### 必要条件
+
+- Node.js 18+
+- npm (Node.jsパッケージマネージャー)
+
+### インストール
+
+```bash
+# 依存関係のインストール
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### 開発サーバーの起動
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
+```bash
+npm run dev
 ```
+
+アプリケーションは http://localhost:5173 で起動します。
+
+### ビルド
+
+```bash
+npm run build
+```
+
+## プロジェクト構造
+
+```
+frontend/
+├── src/
+│   ├── components/        # Reactコンポーネント
+│   ├── hooks/            # カスタムフック
+│   ├── services/         # API通信サービス
+│   ├── types/            # TypeScript型定義
+│   └── App.tsx          # メインアプリケーション
+├── public/              # 静的ファイル
+├── index.html          # エントリーポイント
+├── package.json        # 依存関係管理
+└── vite.config.ts      # Vite設定
+```
+
+## 使用方法
+
+1. バックエンドサーバーを起動（http://localhost:8000）
+2. フロントエンド開発サーバーを起動（http://localhost:5173）
+3. ブラウザで http://localhost:5173 にアクセス
+4. 「録音開始」ボタンをクリック
+5. マイクアクセスを許可
+6. 話し始める（2秒間の沈黙で文字起こしが実行されます）
+
+## 開発ガイドライン
+
+### コンポーネント設計
+
+- 機能ごとにコンポーネントを分割
+- カスタムフックを使用してロジックを分離
+- TypeScriptの型定義を活用
+
+### 状態管理
+
+- React Hooksを使用（useState, useEffect, useRef）
+- 必要に応じてContext APIを活用
+
+### スタイリング
+
+- モダンなCSSアプローチ
+- レスポンシブデザイン
+- アクセシビリティに配慮
+
+## 注意事項
+
+- 現在のところ、Safariブラウザでの動作を推奨
+- Chromeでは一部機能が制限される可能性があります
+- マイクアクセスにはブラウザの許可が必要です
+
+## ライセンス
+
+このプロジェクトはMITライセンスの下で公開されています。
