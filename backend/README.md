@@ -31,6 +31,7 @@ FastAPIとWebSocketを使用したリアルタイム音声文字起こしのバ�
 ### インストール
 ```bash
 # 依存関係のインストール
+brew install portaudio (pyaudioのインストールに必要)
 uv pip install -r requirements.txt
 ```
 
