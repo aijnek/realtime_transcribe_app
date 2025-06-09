@@ -52,7 +52,7 @@ realtime_transcription_app/
 2. **環境変数設定**
    ```bash
    # backend/.env ファイルを作成
-   GOOGLE_API_KEY=your_google_api_key_here
+   export GOOGLE_API_KEY="your_google_api_key_here"
    ```
 
 3. **サーバー起動**
@@ -91,7 +91,7 @@ realtime_transcription_app/
    ```
 
 2. **ブラウザでアクセス**
-   - http://localhost:5173 を開く
+   - Safariでhttp://localhost:5173 を開く (いまのところChromeではエラーになります)
    - 「録音開始」ボタンをクリック
    - マイクアクセスを許可
    - 話し始める（2秒間沈黙で文字起こし実行）
@@ -166,7 +166,3 @@ uv run python mic_test.py
 - **音声処理**: Google Gemini Live API
 - **UI**: モダンCSS、レスポンシブデザイン
 - **開発環境**: uv (Python), npm (Node.js)
-
-## ライセンス
-
-MIT License
