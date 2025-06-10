@@ -64,31 +64,34 @@ class TranscribeService:
                 print("🔚 音声ストリーム終了通知")
                 
                 # 転写結果を待機
-                print("⏳ 転写結果待機（最大15秒）...")
-                timeout_count = 0
+                print("⏳ 転写結果待機（最大10秒）...")
                 all_responses = []
                 
-                async for response in session.receive():
-                    timeout_count += 1
+                try:
+                    # asyncio.wait_forでタイムアウトを確実に制御
+                    async def collect_responses():
+                        async for response in session.receive():
+                            print(f"📨 レスポンス受信: {type(response)}")
+                            
+                            if response.text is not None:
+                                text = response.text.strip()
+                                if text:
+                                    all_responses.append(text)
+                                    print(f"📝 部分結果: {text}")
+                            
+                            # サーバーコンテンツをチェック
+                            if hasattr(response, 'server_content') and response.server_content:
+                                print(f"🔍 サーバーコンテンツ: {response.server_content}")
+                                if hasattr(response.server_content, 'turn_complete') and response.server_content.turn_complete:
+                                    print("✅ 文字起こし完了")
+                                    break
                     
-                    if response.text is not None:
-                        text = response.text.strip()
-                        if text:
-                            all_responses.append(text)
-                            print(f"📝 部分結果: {text}")
+                    await asyncio.wait_for(collect_responses(), timeout=10.0)
                     
-                    # サーバーコンテンツをチェック
-                    if hasattr(response, 'server_content') and response.server_content:
-                        if hasattr(response.server_content, 'turn_complete') and response.server_content.turn_complete:
-                            print("✅ 文字起こし完了")
-                            break
-                    
-                    # タイムアウト (15秒)
-                    if timeout_count > 150:
-                        print("⏰ タイムアウト")
-                        break
-                    
-                    await asyncio.sleep(0.1)
+                except asyncio.TimeoutError:
+                    print("⏰ 10秒でタイムアウト - 強制終了")
+                except Exception as e:
+                    print(f"❌ レスポンス処理エラー: {e}")
                 
                 # 最終結果を返す
                 if all_responses:

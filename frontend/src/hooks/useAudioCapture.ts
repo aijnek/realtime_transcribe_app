@@ -92,6 +92,18 @@ export const useAudioCapture = (config: Partial<AudioCaptureConfig> = {}) => {
       offset += buffer.length;
     }
     
+    // Check if chunk contains meaningful audio (not just silence)
+    const maxAmplitude = Math.max(...Array.from(combinedBuffer).map(Math.abs));
+    const minAudioThreshold = 100; // Minimum amplitude for meaningful audio
+    
+    if (maxAmplitude < minAudioThreshold) {
+      console.log(`🔇 無音チャンクをスキップ: 最大振幅=${maxAmplitude}, 閾値=${minAudioThreshold}`);
+      // Clear buffer without sending
+      audioBufferRef.current = [];
+      silenceStartRef.current = null;
+      return;
+    }
+    
     // Create audio chunk
     const chunk: AudioChunk = {
       data: combinedBuffer.buffer,
@@ -106,7 +118,7 @@ export const useAudioCapture = (config: Partial<AudioCaptureConfig> = {}) => {
     audioBufferRef.current = [];
     silenceStartRef.current = null;
     
-    console.log(`🎤 音声チャンク送信: ${combinedBuffer.length * 2} bytes, レベル: ${chunk.audioLevel.toFixed(1)}`);
+    console.log(`🎤 音声チャンク送信: ${combinedBuffer.length * 2} bytes, レベル: ${chunk.audioLevel.toFixed(1)}, 最大振幅: ${maxAmplitude}`);
   }, []);
   
   const startRecording = useCallback(async (onAudioChunk: (chunk: AudioChunk) => void) => {
