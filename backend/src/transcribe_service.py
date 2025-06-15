@@ -60,7 +60,7 @@ class TranscribeService:
                 return False
 
     async def transcribe_audio_chunk(self, audio_data: bytes) -> Optional[str]:
-        """音声チャンクを既存セッションで処理"""
+        """音声チャンクを既存セッションで処理し、リアルタイム結果を取得"""
         async with self.session_lock:
             if not self.is_session_active or not self.session:
                 # セッションが無い場合は開始
@@ -80,8 +80,36 @@ class TranscribeService:
                 )
                 print("📤 音声データ送信完了")
                 
-                # 即座に結果を待機せず、バッファリング
-                return None
+                # リアルタイム結果を取得（短いタイムアウトで）
+                partial_results = []
+                
+                async def collect_partial_responses():
+                    async for response in self.session.receive():
+                        if response.text is not None:
+                            text = response.text.strip()
+                            if text:
+                                partial_results.append(text)
+                                print(f"🔄 部分結果: {text}")
+                                # 最初の結果が得られたら即座に返す
+                                return
+                        
+                        # 短時間でタイムアウトして処理を進める
+                        if len(partial_results) > 0:
+                            break
+                
+                try:
+                    # 短いタイムアウト（2秒）でリアルタイム結果を取得
+                    await asyncio.wait_for(collect_partial_responses(), timeout=2.0)
+                except asyncio.TimeoutError:
+                    print("⏰ 部分結果取得タイムアウト（通常の動作）")
+                
+                # 部分結果があれば返す
+                if partial_results:
+                    result = " ".join(partial_results)
+                    print(f"📝 チャンク結果返却: '{result}'")
+                    return result
+                else:
+                    return None
                 
             except Exception as e:
                 print(f"❌ 音声チャンク処理エラー: {e}")

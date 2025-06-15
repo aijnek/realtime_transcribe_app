@@ -73,8 +73,16 @@ async def websocket_endpoint(websocket: WebSocket):
             if message["type"] == "audio_chunk":
                 audio_data = base64.b64decode(message["data"])
                 
-                # 音声チャンクを転写サービスに送信（結果は end_session で取得）
-                await transcribe_service.transcribe_audio_chunk(audio_data)
+                # 音声チャンクを転写サービスに送信し、リアルタイム結果を取得
+                partial_result = await transcribe_service.transcribe_audio_chunk(audio_data)
+                
+                # 部分的な結果があればすぐにクライアントに送信
+                if partial_result:
+                    await manager.send_message(websocket, {
+                        "type": "partial_transcription",
+                        "text": partial_result,
+                        "timestamp": message.get("timestamp")
+                    })
             
             elif message["type"] == "start_session":
                 await transcribe_service.start_session()
