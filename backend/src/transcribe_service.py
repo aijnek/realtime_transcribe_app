@@ -10,7 +10,10 @@ class TranscribeService:
         self.api_key = api_key
         self.client = genai.Client(api_key=api_key)
         self.session = None
+        self.session_context = None
         self.model = "gemini-2.0-flash-live-001"
+        self.is_session_active = False
+        self.session_lock = asyncio.Lock()
         
         self.system_instruction = """
         あなたは正確な音声文字起こしシステムです。聞こえた音声を正確に文字起こししてください。
@@ -36,22 +39,40 @@ class TranscribeService:
         }
 
     async def start_session(self):
-        """転写セッション開始 - 実際の処理は transcribe_audio_chunk で行う"""
-        print("📢 文字起こしサービス準備完了")
-        return True
+        """転写セッション開始 - 実際のGemini Live APIセッションを開始"""
+        async with self.session_lock:
+            if self.is_session_active:
+                print("⚠️ セッション既に開始済み")
+                return True
+                
+            try:
+                print("📢 Gemini Live APIセッション開始")
+                self.session_context = self.client.aio.live.connect(
+                    model=self.model, 
+                    config=self.config
+                )
+                self.session = await self.session_context.__aenter__()
+                self.is_session_active = True
+                print("✅ セッション開始完了")
+                return True
+            except Exception as e:
+                print(f"❌ セッション開始エラー: {e}")
+                return False
 
     async def transcribe_audio_chunk(self, audio_data: bytes) -> Optional[str]:
-        """音声チャンクを文字起こし - 元のtranscribe.pyパターンを使用"""
-        
-        try:
-            print(f"🎤 音声データ受信: {len(audio_data)} bytes")
+        """音声チャンクを既存セッションで処理"""
+        async with self.session_lock:
+            if not self.is_session_active or not self.session:
+                # セッションが無い場合は開始
+                success = await self.start_session()
+                if not success:
+                    return None
             
-            # 新しいセッションで処理（元のパターン）
-            async with self.client.aio.live.connect(model=self.model, config=self.config) as session:
-                print("📢 Gemini Live APIセッション開始")
+            try:
+                print(f"🎤 音声データ受信: {len(audio_data)} bytes")
                 
-                # 音声データを送信
-                await session.send_realtime_input(
+                # 既存セッションに音声データを送信
+                await self.session.send_realtime_input(
                     audio=types.Blob(
                         data=audio_data,
                         mime_type="audio/pcm;rate=16000"
@@ -59,59 +80,74 @@ class TranscribeService:
                 )
                 print("📤 音声データ送信完了")
                 
-                # 音声ストリーム終了を通知
-                await session.send_realtime_input(audio_stream_end=True)
-                print("🔚 音声ストリーム終了通知")
+                # 即座に結果を待機せず、バッファリング
+                return None
                 
-                # 転写結果を待機
-                print("⏳ 転写結果待機（最大10秒）...")
+            except Exception as e:
+                print(f"❌ 音声チャンク処理エラー: {e}")
+                return None
+
+    async def end_session(self):
+        """セッション終了 - 最終的な転写結果を取得"""
+        async with self.session_lock:
+            if not self.is_session_active or not self.session:
+                print("⚠️ セッションが開始されていません")
+                return None
+                
+            try:
+                print("🔚 音声ストリーム終了通知")
+                await self.session.send_realtime_input(audio_stream_end=True)
+                
+                # 最終結果を収集
+                print("⏳ 最終転写結果待機（最大15秒）...")
                 all_responses = []
                 
-                try:
-                    # asyncio.wait_forでタイムアウトを確実に制御
-                    async def collect_responses():
-                        async for response in session.receive():
-                            print(f"📨 レスポンス受信: {type(response)}")
-                            
-                            if response.text is not None:
-                                text = response.text.strip()
-                                if text:
-                                    all_responses.append(text)
-                                    print(f"📝 部分結果: {text}")
-                            
-                            # サーバーコンテンツをチェック
-                            if hasattr(response, 'server_content') and response.server_content:
-                                print(f"🔍 サーバーコンテンツ: {response.server_content}")
-                                if hasattr(response.server_content, 'turn_complete') and response.server_content.turn_complete:
-                                    print("✅ 文字起こし完了")
-                                    break
-                    
-                    await asyncio.wait_for(collect_responses(), timeout=10.0)
-                    
-                except asyncio.TimeoutError:
-                    print("⏰ 10秒でタイムアウト - 強制終了")
-                except Exception as e:
-                    print(f"❌ レスポンス処理エラー: {e}")
+                async def collect_final_responses():
+                    async for response in self.session.receive():
+                        if response.text is not None:
+                            text = response.text.strip()
+                            if text:
+                                all_responses.append(text)
+                                print(f"📝 最終結果: {text}")
+                        
+                        if hasattr(response, 'server_content') and response.server_content:
+                            if hasattr(response.server_content, 'turn_complete') and response.server_content.turn_complete:
+                                print("✅ 転写完了")
+                                break
+                
+                await asyncio.wait_for(collect_final_responses(), timeout=15.0)
                 
                 # 最終結果を返す
                 if all_responses:
                     final_result = " ".join(all_responses)
-                    print(f"📄 最終文字起こし結果: '{final_result}'")
+                    print(f"📄 セッション終了時の最終結果: '{final_result}'")
                     return final_result
                 else:
-                    print("❌ 文字起こし結果が取得できませんでした")
+                    print("❌ 最終転写結果が取得できませんでした")
                     return None
                     
-        except Exception as e:
-            print(f"❌ 文字起こしエラー: {e}")
-            import traceback
-            traceback.print_exc()
-            return None
+            except asyncio.TimeoutError:
+                print("⏰ 最終結果取得タイムアウト")
+                return None
+            except Exception as e:
+                print(f"❌ セッション終了エラー: {e}")
+                return None
+            finally:
+                await self._cleanup_session()
 
-    async def end_session(self):
-        """文字起こしセッション終了"""
-        print("🔚 文字起こしサービス終了")
+    async def _cleanup_session(self):
+        """セッションクリーンアップ"""
+        try:
+            if self.session_context:
+                await self.session_context.__aexit__(None, None, None)
+                self.session_context = None
+            
+            self.session = None
+            self.is_session_active = False
+            print("🧹 セッションクリーンアップ完了")
+        except Exception as e:
+            print(f"❌ クリーンアップエラー: {e}")
 
     async def cleanup(self):
         """リソースクリーンアップ"""
-        await self.end_session()
+        await self._cleanup_session()

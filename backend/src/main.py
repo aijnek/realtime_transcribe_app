@@ -73,15 +73,8 @@ async def websocket_endpoint(websocket: WebSocket):
             if message["type"] == "audio_chunk":
                 audio_data = base64.b64decode(message["data"])
                 
-                # 音声チャンクを転写サービスに送信
-                result = await transcribe_service.transcribe_audio_chunk(audio_data)
-                
-                if result:
-                    await manager.send_message(websocket, {
-                        "type": "transcription_result",
-                        "text": result,
-                        "timestamp": message.get("timestamp")
-                    })
+                # 音声チャンクを転写サービスに送信（結果は end_session で取得）
+                await transcribe_service.transcribe_audio_chunk(audio_data)
             
             elif message["type"] == "start_session":
                 await transcribe_service.start_session()
@@ -90,7 +83,13 @@ async def websocket_endpoint(websocket: WebSocket):
                 })
             
             elif message["type"] == "end_session":
-                await transcribe_service.end_session()
+                final_result = await transcribe_service.end_session()
+                if final_result:
+                    await manager.send_message(websocket, {
+                        "type": "transcription_result",
+                        "text": final_result,
+                        "timestamp": message.get("timestamp")
+                    })
                 await manager.send_message(websocket, {
                     "type": "session_ended"
                 })
